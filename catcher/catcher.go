@@ -12,6 +12,7 @@ import (
 	"time"
 
 	sgo "github.com/SolmateDev/solana-go"
+	"github.com/solpipe/go-solana-firehose/common"
 )
 
 type external struct {
@@ -21,16 +22,16 @@ type external struct {
 	transaction_socket_path string
 	slot_socket_path        string
 	errorC                  chan<- error
-	slotUpdateC             chan<- SlotUpdate
-	accountUpdateC          chan<- AccountUpdate
-	transactionUpdateC      chan<- TransactionUpdate
+	slotUpdateC             chan<- common.SlotUpdate
+	accountUpdateC          chan<- common.AccountUpdate
+	transactionUpdateC      chan<- common.TransactionUpdate
 }
 
 type ReceiverGroup struct {
 	ErrorC       <-chan error
-	SlotC        <-chan SlotUpdate
-	AccountC     <-chan AccountUpdate
-	TransactionC <-chan TransactionUpdate
+	SlotC        <-chan common.SlotUpdate
+	AccountC     <-chan common.AccountUpdate
+	TransactionC <-chan common.TransactionUpdate
 }
 
 func RunDetached(
@@ -43,9 +44,9 @@ func RunDetached(
 	ctxC, cancel := context.WithCancel(ctx)
 	errorC := make(chan error, 1)
 	summaryErrorC := make(chan error, 1)
-	slotUpdateC := make(chan SlotUpdate)
-	accountUpdateC := make(chan AccountUpdate)
-	transactionUpdateC := make(chan TransactionUpdate)
+	slotUpdateC := make(chan common.SlotUpdate)
+	accountUpdateC := make(chan common.AccountUpdate)
+	transactionUpdateC := make(chan common.TransactionUpdate)
 	rg = ReceiverGroup{
 		ErrorC:       summaryErrorC,
 		SlotC:        slotUpdateC,

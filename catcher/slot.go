@@ -8,12 +8,8 @@ import (
 
 	sgorpc "github.com/SolmateDev/solana-go/rpc"
 	sgows "github.com/SolmateDev/solana-go/rpc/ws"
+	"github.com/solpipe/go-solana-firehose/common"
 )
-
-type SlotUpdate struct {
-	Result     sgows.SlotResult
-	Commitment sgorpc.CommitmentType
-}
 
 // format: [slot, uint64][parent,uint64][status,u8 (0=processed,1=rooted,2=confirmed)]
 func (e1 external) parseSlot(c io.Reader) error {
@@ -53,7 +49,7 @@ func (e1 external) parseSlot(c io.Reader) error {
 	select {
 	case <-doneC:
 		err = errors.New("canceled")
-	case e1.slotUpdateC <- SlotUpdate{
+	case e1.slotUpdateC <- common.SlotUpdate{
 		Result:     *result,
 		Commitment: confirmationStatus,
 	}:

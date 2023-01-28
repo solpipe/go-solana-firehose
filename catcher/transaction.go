@@ -4,23 +4,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"log"
 
-	sgo "github.com/SolmateDev/solana-go"
+	"github.com/solpipe/go-solana-firehose/common"
 )
-
-type TransactionUpdate struct {
-	Slot   uint64
-	TxId   sgo.Signature
-	IsVote bool
-	Index  uint64
-	Meta   Meta
-}
 
 // format: [slot,u64][txid, sig][isVote,bool][index,usize][transaction,sanitized]
 // [meta,meta]
 func (e1 external) parseTransaction(c io.Reader) error {
-	log.Print("parsing transaction")
 	doneC := e1.ctx.Done()
 	var err error
 
@@ -32,11 +22,9 @@ func (e1 external) parseTransaction(c io.Reader) error {
 
 	txid, err := readSignature(c)
 	if err != nil {
-		log.Printf("txid error: %s", err.Error())
 		return err
 		//return nil
 	}
-	log.Printf("txid=%s", txid.String())
 	isVote, err := readBool(c)
 	if err != nil {
 		return err
@@ -56,7 +44,7 @@ func (e1 external) parseTransaction(c io.Reader) error {
 	select {
 	case <-doneC:
 		return errors.New("canceled")
-	case e1.transactionUpdateC <- TransactionUpdate{
+	case e1.transactionUpdateC <- common.TransactionUpdate{
 		Slot:   slot,
 		TxId:   txid,
 		IsVote: isVote,
@@ -68,14 +56,7 @@ func (e1 external) parseTransaction(c io.Reader) error {
 	return nil
 }
 
-type Meta struct {
-	HadErr          bool
-	BalancesPre     []uint64
-	BalancesPost    []uint64
-	ComputeConsumed uint64
-}
-
-func readMeta(c io.Reader) (m Meta, err error) {
+func readMeta(c io.Reader) (m common.Meta, err error) {
 	isErr, err := readBool(c)
 	if err != nil {
 		return
@@ -119,7 +100,7 @@ func readMeta(c io.Reader) (m Meta, err error) {
 		return
 	}
 
-	m = Meta{
+	m = common.Meta{
 		HadErr:          isErr,
 		BalancesPre:     preBalList,
 		BalancesPost:    postBalList,
