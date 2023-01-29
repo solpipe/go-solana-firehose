@@ -1,6 +1,6 @@
 module github.com/solpipe/go-solana-firehose
 
-go 1.19
+go 1.18
 
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.10 // indirect
